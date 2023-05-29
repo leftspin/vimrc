@@ -25,26 +25,40 @@ else " we are plain old vim
 
 endif
 
-" these syntax highlighters are also active for vim
-" even though vim 8.2 has built-in support because
-" the built-in support is crappy. When it's no longer
-" crappy, this should be moved into the vim block above
-" Plug 'leafgarland/typescript-vim'
-" Plug 'ianks/vim-tsx'
-" Plug 'peitalin/vim-jsx-typescript'
-Plug 'maxmellon/vim-jsx-pretty'
-Plug 'itchyny/lightline.vim'
-Plug 'junegunn/fzf.vim'
-Plug 'junegunn/fzf', { 'do': { -> fzf#install() } }
-Plug 'preservim/nerdtree'
-Plug 'tpope/vim-fugitive'
-Plug 'tpope/vim-commentary'
+
+Plug 'jparise/vim-graphql'
+Plug 'APZelos/blamer.nvim'
+Plug 'vim-scripts/lightline'
+Plug 'yuezk/vim-js'
+Plug 'MaxMEllon/vim-jsx-pretty'
+Plug 'peitalin/vim-jsx-typescript'
+Plug 'mhinz/vim-startify'
+Plug 'HerringtonDarkholme/yats.vim'
 Plug 'ludovicchabant/vim-gutentags'
 Plug 'tpope/vim-surround'
-Plug 'tpope/vim-rhubarb'
+Plug 'tpope/vim-vinegar'
+Plug 'tpope/vim-fugitive'
+Plug 'tpope/vim-commentary'
+Plug 'tpope/vim-rhubarb' " enabled GBrowse
+Plug 'tpope/vim-dispatch'
 Plug 'lilyball/vim-swift'
 Plug 'bkad/CamelCaseMotion'
-Plug 'joshdick/onedark.vim'
+Plug 'junegunn/fzf.vim'
+Plug 'junegunn/fzf', { 'do': { -> fzf#install() } }
+Plug 'justinmk/vim-sneak'
+Plug 'jph00/swift-apple'
+Plug 'mattn/emmet-vim'
+Plug 'hallzy/lightline-onedark'
+Plug 'alvan/vim-closetag'
+Plug 'airblade/vim-gitgutter'
+" Plug 'fatih/vim-go', { 'do': ':GoUpdateBinaries' }
+Plug 'jamestthompson3/nvim-remote-containers'
+Plug 'vim-test/vim-test'
+Plug 'skywind3000/asyncrun.vim'
+Plug 'github/copilot.vim'
+Plug 'evanleck/vim-svelte'
+Plug 'fcpg/vim-osc52'
+
 
 " post install (yarn install | npm install) then load plugin only for editing
 " supported files
@@ -54,8 +68,10 @@ Plug 'joshdick/onedark.vim'
 
 call plug#end()
 
-
 " Theme stuff __________________________________________________________________
+
+set termguicolors
+
 "
 "
 " Use 24-bit (true-color) mode in Vim/Neovim when outside tmux.
@@ -74,43 +90,6 @@ if (empty($TMUX))
     " set t_8b=[48;2;%lu;%lu;%lum
     set termguicolors
   endif
-endif
-
-" onedark.vim override: Set a custom background color in the terminal
- if (has("autocmd") && !has("gui_running"))
-   augroup colors
-     autocmd!
-     let s:background = { "gui": "#080c14", "cterm": "6", "cterm16": "4" }
-     autocmd ColorScheme * call onedark#set_highlight("Normal", { "bg": s:background }) "No `fg` setting
-   augroup END
- endif
-
-let g:onedark_terminal_italics=1
-
-" onedark.vim override: Don't set a background color when running in a terminal;
-" just use the terminal's background color
-" `gui` is the hex color code used in GUI mode/nvim true-color mode
-" `cterm` is the color code used in 256-color mode
-" `cterm16` is the color code used in 16-color mode
-if (has("autocmd") && !has("gui_running"))
-  augroup colorset
-    autocmd!
-    let s:white = { "gui": "#ABB2BF", "cterm": "145", "cterm16" : "7" }
-    autocmd ColorScheme * call onedark#set_highlight("Normal", { "fg": s:white }) " `bg` will not be styled since there is no `bg` setting
-  augroup END
-endif
-
-if (has("autocmd"))
-  augroup colorextend
-    autocmd!
-    autocmd ColorScheme * call onedark#extend_highlight("Keyword", { "gui": "italic" })
-    autocmd ColorScheme * call onedark#extend_highlight("Conditional", { "gui": "italic" })
-    autocmd ColorScheme * call onedark#extend_highlight("Repeat", { "gui": "italic" })
-    autocmd ColorScheme * call onedark#extend_highlight("Label", { "gui": "italic" })
-    autocmd ColorScheme * call onedark#extend_highlight("Exception", { "gui": "italic" })
-    autocmd ColorScheme * call onedark#extend_highlight("Special", { "gui": "italic" })
-    autocmd ColorScheme * call onedark#extend_highlight("Function", { "gui": "bold" })
-  augroup END
 endif
 
 " *cterm-colors*
@@ -133,59 +112,154 @@ endif
 " 14      3*      Yellow, LightYellow
 " 15      7*      White
 
+colorscheme clarity
 
-" highlight LineNr ctermfg=darkgrey
-" highlight CursorLineNr ctermfg=white
 " highlight Pmenu ctermbg=DarkGray guibg=DarkGray ctermfg=White guifg=White
 " highlight PmenuSel ctermbg=DarkCyan guibg=DarkCyan ctermfg=Black guifg=Black
 " highlight PmenuThumb ctermbg=Yellow guibg=Yellow
 " highlight PmenuSbar ctermbg=Black guibg=Black
-
-highlight Cursor guibg=DarkCyan
-set guicursor=n-v-c:Cursor-block,i-ci-cr:Cursor-ver20-blinkon1000-blinkoff100-blinkwait100
-
-colorscheme onedark
-
+highlight CocCodeLens guifg=#505050 
+" highlight Cursor guibg=DarkCyan
+" highlight CocHighlightText guibg=#104040 ctermbg=222
+set guicursor=n-v-c:block-Cursor/lCursor-blinkon5000-blinkoff50-blinkwait100,i-ci-cr:Cursor-ver20-blinkon2000-blinkoff50-blinkwait100
 
 " Settings _____________________________________________________________________
 "
-
 set laststatus=2 " needed for lightline
 set shell=zsh\ -i
-set tabstop=4 softtabstop=0 expandtab shiftwidth=4 smarttab
+set tabstop=2 softtabstop=0 expandtab shiftwidth=2 smarttab
 set noshowmode " disables -- INSERT -- which is provided by lightline
 set wrap
 set linebreak
 set list listchars=tab:»·,trail:·
 set ls=2
+set noequalalways
+set shell=/bin/bash
 
 " Config _______________________________________________________________________
 "
+autocmd BufEnter *.{js,jsx,ts,tsx} :syntax sync fromstart
+autocmd BufLeave *.{js,jsx,ts,tsx} :syntax sync clear
+
+" au FileType go nmap \ds <Plug>(go-def-split)
+" au FileType go nmap \dv <Plug>(go-def-vertical)
+" au FileType go nmap \dt <Plug>(go-def-tab)
+
+" testing
+let test#strategy = "dispatch"
+let g:test#neovim#start_normal = 1 " If using neovim strategy
+" let test#javascript#jest#options = "--color=always"
+
+
+let g:coc_global_extensions = ['coc-solargraph']
+
+" let g:fzf_layout = { 'window': { 'width': 1, 'height': 0.5, 'yoffset': 1, 'border': 'top' } }
+let g:fzf_layout = { 'window': 'tabnew' }
+let g:fzf_preview_window = ['up:40%']
+let g:fzf_colors =
+\ { 'fg':      ['fg', 'Normal'],
+  \ 'bg':      ['bg', 'Normal'],
+  \ 'hl':      ['fg', 'String'],
+  \ 'hl+':     ['fg', 'Statement'],
+  \ 'fg+':     ['fg', 'Directory', 'CursorColumn', 'Normal'],
+  \ 'bg+':     ['bg', 'Directory', 'CursorColumn'],
+  \ 'info':    ['fg', 'Keyword'],
+  \ 'border':  ['fg', 'Ignore'],
+  \ 'prompt':  ['fg', 'Statement'],
+  \ 'pointer': ['fg', 'Directory'],
+  \ 'marker':  ['fg', 'Directory'],
+  \ 'spinner': ['fg', 'Label'],
+  \ 'preview-bg':  ['bg', 'CursorColumn'],
+  \ 'header':  ['fg', 'Comment'] }
+
+let g:startify_change_to_dir = 0
+let g:startify_change_to_vcs_root = 1
+let g:startify_session_delete_buffers = 1
+let g:startify_session_persistence = 1
+let g:startify_enable_special = 1
+
+" let g:closetag_filenames = '*.html,*.xhtml,*.phtml'
+" let g:closetag_xhtml_filenames = '*.xhtml,*.jsx,*.tsx,*.ts'
+" let g:closetag_regions = {
+"     \ 'typescript.tsx': 'jsxRegion,tsxRegion',
+"     \ 'javascript.jsx': 'jsxRegion',
+"     \ 'typescriptreact': 'jsxRegion,tsxRegion',
+"     \ 'javascriptreact': 'jsxRegion',
+"     \ }
+" let g:closetag_shortcut = '>'
+" let g:closetag_close_shortcut = '<leader>>'
+" let g:closetag_filetypes = 'html,xhtml,phtml'
+" let g:closetag_xhtml_filetypes = 'xhtml,jsx'
+
+" " Change the color of current & background windows
+" function! s:configure_winhighlight()
+"   let ft = &filetype
+"   let bt = &buftype
+"   " Check white/blacklist.
+"   if index(['dirvish'], ft) == -1
+"         \ && (index(['nofile', 'nowrite', 'acwrite', 'quickfix', 'help'], bt) != -1
+"         \     || index(['startify'], ft) != -1)
+"     set winhighlight=Normal:MyNormalWin,NormalNC:MyNormalWin
+"     " echom "normal" winnr() &winhighlight 'ft:'.&ft 'bt:'.&bt
+"   else
+"     set winhighlight=Normal:MyNormalWin,NormalNC:MyInactiveWin
+"     " echom "inactive" winnr() &winhighlight 'ft:'.&ft 'bt:'.&bt
+"   endif
+" endfunction
+" augroup inactive_win
+"   au!
+"   au ColorScheme * hi link MyInactiveWin ColorColumn | hi link MyNormalWin Normal
+"   au FileType,BufWinEnter * call s:configure_winhighlight()
+"   au FocusGained * hi link MyNormalWin Normal
+"   au FocusLost * hi link MyNormalWin MyInactiveWin
+" augroup END
+
+" Blamer
+let g:blamer_enabled = 1
+let g:blamer_show_in_visual_modes = 0
+let g:blamer_prefix = ' ◼︎ '
+
+" Neovide
+let g:neovide_cursor_vfx_mode = "railgun"
+let g:neovide_refresh_rate=120
+let g:neovide_cursor_animation_length=0.13
+set guifont=JetBrains\ Mono:h14
+
+" Syntax highlighting group under the cursor
+function!SynGroup()                                                            
+    let l:s = synID(line('.'), col('.'), 1)                                       
+            echo synIDattr(l:s, 'name') . ' -> ' . synIDattr(synIDtrans(l:s), 'name')
+        endfun
+
 
 " Rhubarb Gbrowse
 let g:github_enterprise_urls = ['https://github.cbhq.net']
 
-augroup numbertoggle
-  autocmd!
-  autocmd VimEnter,WinEnter,BufWinEnter     * set number relativenumber
-  autocmd WinLeave                          * set norelativenumber nonumber
-augroup END
+if !exists('g:vscode')
+  augroup numbertoggle
+      autocmd!
+      autocmd VimEnter,WinEnter,BufWinEnter     * set number relativenumber
+      autocmd WinLeave                          * set norelativenumber nonumber
+    augroup END
+endif
 
 " NOTE: Please see `:h coc-status` for integrations with external plugins that
 " provide custom statusline: lightline.vim, vim-airline.
 
-function! StatusDiagnostic() abort
-  let info = get(b:, 'coc_diagnostic_info', {})
-  if empty(info) | return '' | endif
-  let msgs = []
-  if get(info, 'error', 0)
-    call add(msgs, info['error'] . ' Errors')
-  endif
-  if get(info, 'warning', 0)
-    call add(msgs, info['warning'] . ' Warnings')
-  endif
-  return join(msgs, ' ')
-endfunction
+if !exists('g:vscode')
+    function! StatusDiagnostic() abort
+      let info = get(b:, 'coc_diagnostic_info', {})
+      if empty(info) | return '' | endif
+      let msgs = []
+      if get(info, 'error', 0)
+        call add(msgs, info['error'] . ' Errors')
+      endif
+      if get(info, 'warning', 0)
+        call add(msgs, info['warning'] . ' Warnings')
+      endif
+      return join(msgs, ' ')
+    endfunction
+endif
 
 let g:lightline = {
         \   'colorscheme': 'onedark',
@@ -204,8 +278,8 @@ let g:lightline = {
 
 augroup CursorLineOnlyInActiveWindow
   autocmd!
-  autocmd VimEnter,WinEnter,BufWinEnter * setlocal cursorline
-  autocmd WinLeave * setlocal nocursorline
+  autocmd VimEnter,WinEnter,BufWinEnter * setlocal cursorline cursorcolumn
+  autocmd WinLeave * setlocal nocursorline nocursorcolumn
 augroup END
 
  if has('linebreak')
@@ -223,15 +297,56 @@ au BufNewFile,BufRead *.tsx,*.jsx setlocal filetype=typescript.tsx
 
 " prettier runs after existing insert
 "
-if !has('nvim')
+if !has('nvim') && !exists('g:vscode')
     autocmd TextChanged,InsertLeave *.js,*.jsx,*.mjs,*.ts,*.tsx,*.css,*.less,*.scss,*.json,*.graphql,*.md,*.vue,*.yaml,*.html PrettierAsync
 endif
 
+" Disable Background Color Erase (BCE) so that color schemes
+" work properly when Vim is used inside tmux and GNU screen.
+if &term =~ '256color'
+    set t_ut=
+endif
+
 " move tags to a single directory
+" let g:gutentags_trace = 1
 let g:gutentags_cache_dir = expand('~/.cache/vim/ctags/')
 let g:gutentags_add_default_project_roots = 0
-let g:gutentags_project_root = ['package.json', '.git']
+let g:gutentags_project_root  = ['package.json', '.git']
+" Add these to the above for Mercurial and SVN: '.hg', '.svn'
+let g:gutentags_exclude_filetypes = ['gitcommit', 'gitconfig', 'gitrebase', 'gitsendemail', 'git']
+let g:gutentags_generate_on_new = 1
+let g:gutentags_generate_on_missing = 1
+let g:gutentags_generate_on_write = 1
+let g:gutentags_generate_on_empty_buffer = 0
+let g:gutentags_ctags_extra_args = ['--tag-relative=yes', '--fields=+ailmnS']
+let g:gutentags_ctags_exclude = [
+\  '*.git', '*.svn', '*.hg',
+\  'cache', 'build', 'dist', 'bin', 'node_modules', 'bower_components',
+\  '*.d.ts*',
+\  '*-lock.json',  '*.lock',
+\  '*.min.*',
+\  '*.bak',
+\  '*.zip',
+\  '*.pyc',
+\  '*.class',
+\  '*.sln',
+\  '*.csproj', '*.csproj.user',
+\  '*.tmp',
+\  '*.cache',
+\  '*.vscode',
+\  '*.pdb',
+\  '*.exe', '*.dll', '*.bin',
+\  '*.mp3', '*.ogg', '*.flac',
+\  '*.swp', '*.swo',
+\  '.DS_Store', '*.plist',
+\  '*.bmp', '*.gif', '*.ico', '*.jpg', '*.png', '*.svg',
+\  '*.rar', '*.zip', '*.tar', '*.tar.gz', '*.tar.xz', '*.tar.bz2',
+\  '*.pdf', '*.doc', '*.docx', '*.ppt', '*.pptx', '*.xls',
+\]
 
+" Watchbuild
+" build and populate errors on change
+autocmd User CocNvimInit call CocAction('runCommand', 'tsserver.watchBuild')
 
 " Commands _____________________________________________________________________
 "
@@ -239,6 +354,13 @@ command! Rc e $MYVIMRC
 command! Sorc so $MYVIMRC
 command! Conflicts Ag<<<<<<
 
+" Vertical Split Buffer Function
+function VerticalSplitBuffer(buffer)
+    execute "vert belowright sb" a:buffer 
+endfunction
+
+" Vertical Split Buffer Mapping
+command! -nargs=1 Vsb call VerticalSplitBuffer(<f-args>)
 
 " Utility functions ____________________________________________________________
 "
@@ -259,9 +381,19 @@ function! FillLine( str )
     endif
 endfunction
 
+" osc52 support
+if has('textyankpost')
+    augroup BlinkClipboardIntegration
+        autocmd!
+        " For some reason '*' doesn't show up in the clipboard names, so using
+        " 'cy, instead '*y as used expect
+        autocmd TextYankPost * if v:event.regname == 'c' | call SendViaOSC52(join(v:event["regcontents"],"\n")) | endif
+    augroup END
+endif
+
 " coc.nvim config
 
-if has('nvim')
+if has('nvim') && !exists('g:vscode')
 
     " coc extensions
     let g:coc_global_extensions = [
@@ -273,8 +405,11 @@ if has('nvim')
             \ 'coc-json', 
             \ 'coc-yank', 
             \ 'coc-eslint',
-            \ 'coc-prettier' 
             \ ]
+    
+    " Set diffs to vertical
+    set diffopt=internal,filler,vertical
+
     " TextEdit might fail if hidden is not set.
     set hidden
 
@@ -300,23 +435,19 @@ if has('nvim')
     highlight CocWarningFloat ctermfg=yellow
     highlight CocInfoFloat ctermfg=white
     highlight CocHintFloat ctermfg=white
-    highlight CursorLine guibg=#000020
-    highlight Visual guibg=#000020
-    highlight LineNr guifg=#a0a0a0
-    highlight CursorLineNr guifg=white
 
     " Use tab for trigger completion with characters ahead and navigate.
     " NOTE: Use command ':verbose imap <tab>' to make sure tab is not mapped by
     " other plugin before putting this into your config.
     inoremap <silent><expr> <TAB>
-          \ pumvisible() ? "\<C-n>" :
-          \ <SID>check_back_space() ? "\<TAB>" :
-          \ coc#refresh()
+                \ pumvisible() ? "\<C-n>" :
+                \ <SID>check_back_space() ? "\<TAB>" :
+                \ coc#refresh()
     inoremap <expr><S-TAB> pumvisible() ? "\<C-p>" : "\<C-h>"
 
     function! s:check_back_space() abort
-      let col = col('.') - 1
-      return !col || getline('.')[col - 1]  =~# '\s'
+        let col = col('.') - 1
+        return !col || getline('.')[col - 1]  =~# '\s'
     endfunction
 
     " Use <c-space> to trigger completion.
@@ -344,6 +475,12 @@ if has('nvim')
     " Use K to show documentation in preview window.
     nnoremap <silent> K :call <SID>show_documentation()<CR>
 
+    " scroll nvim popups
+    nnoremap <nowait><expr> <C-j> coc#float#has_scroll() ? coc#float#scroll(1) : "\<C-j>"
+    nnoremap <nowait><expr> <C-k> coc#float#has_scroll() ? coc#float#scroll(0) : "\<C-k>"
+    inoremap <nowait><expr> <C-j> coc#float#has_scroll() ? "\<c-r>=coc#float#scroll(1)\<cr>" : "\<Right>"
+    inoremap <nowait><expr> <C-k> coc#float#has_scroll() ? "\<c-r>=coc#float#scroll(0)\<cr>" : "\<Left>"
+
     function! s:show_documentation()
       if (index(['vim','help'], &filetype) >= 0)
         execute 'h '.expand('<cword>')
@@ -356,7 +493,8 @@ if has('nvim')
     autocmd CursorHold * silent call CocActionAsync('highlight')
 
     " Symbol renaming.
-    nmap <leader>rn <Plug>(coc-rename)
+    " nmap <leader>rn <Plug>(coc-rename)
+    nmap <leader>rn :CocCommand document.renameCurrentWord<CR>
 
     " Formatting selected code.
     xmap <leader>f  <Plug>(coc-format-selected)
@@ -390,8 +528,8 @@ if has('nvim')
     " Use <TAB> for selections ranges.
     " NOTE: Requires 'textDocument/selectionRange' support from the language server.
     " coc-tsserver, coc-python are the examples of servers that support it.
-    nmap <silent> <TAB> <Plug>(coc-range-select)
-    xmap <silent> <TAB> <Plug>(coc-range-select)
+    " nmap <silent> <TAB> <Plug>(coc-range-select)
+    " xmap <silent> <TAB> <Plug>(coc-range-select)
 
     " Add `:Format` command to format current buffer.
     command! -nargs=0 Format :call CocAction('format')
@@ -412,7 +550,7 @@ if has('nvim')
     " Show commands.
     nnoremap <silent> <space>c  :<C-u>CocList commands<cr>
     " Find symbol of current document.
-    nnoremap <silent> <space>o  :<C-u>CocList outline<cr>
+    " nnoremap <silent> <space>o  :<C-u>CocList outline<cr>
     " Search workspace symbols.
     nnoremap <silent> <space>s  :<C-u>CocList -I symbols<cr>
     " Do default action for next item.
@@ -420,33 +558,44 @@ if has('nvim')
     " Do default action for previous item.
     " nnoremap <silent> <space>k  :<C-u>CocPrev<CR>
     " Resume latest coc list.
-    nnoremap <silent> <space>p  :<C-u>CocListResume<CR>
+    " nnoremap <silent> <space>p  :<C-u>CocListResume<CR>
 
 endif
 
 
 " Mappings _____________________________________________________________________
 "
-map <C-n> :NERDTreeToggle<CR>
+" map <C-n> :NERDTreeToggle<CR>
 map <silent> <space>- :call FillLine('_')<CR>
+map <silent> \h :call SynGroup()<CR>
 map <silent> <space>o :Files<CR>
 map <silent> <space>p :Format<CR>
 map <silent> <space>b :bn<CR>
 map <silent> <space>B :Buffers<CR>
 map <silent> <space>f :BLines<CR>
 map <silent> <space>F :Tags<CR>
-map <silent> <space>i :lopen<CR>
-map <silent> <space>I :lopen<CR>:q<CR>
-map <silent> <space>w :bd<CR>
-map <silent> <space>W :bd!<CR>
+map <silent> <space>i :CocList diagnostics<CR>
+map <silent> <space>w :up<bar>bp<bar>sp<bar>bn<bar>bd<CR>
 map <silent> <space>j :call CocAction('diagnosticNext')<CR>
 map <silent> <space>k :call CocAction('diagnosticPrevious')<CR>
+nnoremap <silent> <space>t :TestFile<CR>
+nnoremap <silent> <space>T :TestNearest<CR>
 map <silent> <C-h> xh
+map <silent> <C-CR> :Copilot<CR>
+imap <silent> <C-j> <Plug>(copilot-next)
+imap <silent> <C-k> <Plug>(copilot-previous)
+imap <silent> <C-\> <Plug>(copilot-dismiss)
 map <silent> <space><CR> <Plug>(coc-fix-current)
-map <silent> <space>O :Files %:p:h<CR>
+map <silent> <space>\ <Plug>(coc-codeaction)
+map <silent> <space>O :CocList mru<CR>
 map <silent> ,w <Plug>CamelCaseMotion_w
 map <silent> ,b <Plug>CamelCaseMotion_b
 map <silent> ,e <Plug>CamelCaseMotion_e
 map <silent> ,ge <Plug>CamelCaseMotion_ge
 map <silent> <space>n :noh<CR>
 map <silent> <space>/ :CocList outline<CR>
+map <silent> Tt :tabnew<CR>
+map <silent> Tn :tabnext<CR>
+map <silent> Tp :tabprev<CR>
+map <silent> Tw :tabclose<CR>
+map <silent> <space>y :CocList yank<CR>
